@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "vanessaAutomation": {
+      "type": "remote",
+      "url": "http://127.0.0.1:5431/mcp",
+      "description": "Vanessa Automation MCP — порт должен совпасть с формой «Управление МСР»"
+    }
+  }
+}

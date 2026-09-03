@@ -1,0 +1,17 @@
+# Runtime / local artifacts — do not index infobase or dumps
+_INFOBASE/
+_LOGS/
+_archives/
+_tmp/
+
+# Vanessa run artifacts
+tests/screenshots/
+tests/reports/
+
+# Binary 1C distribution artifacts
+*.1CD
+*.1CD.cfl
+*.cf
+*.cfe
+*.dt
+*.epf

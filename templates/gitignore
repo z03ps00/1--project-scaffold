@@ -1,0 +1,73 @@
+# Параметры среды разработки
+.dev.env
+.ai-rules.json
+
+# Node.js
+node_modules/
+
+# Инфобаза
+_INFOBASE/*
+!_INFOBASE/.gitkeep
+
+# Рабочие/временные зоны
+_LOGS/*
+!_LOGS/.gitkeep
+_archives/*
+!_archives/.gitkeep
+_tmp/*
+!_tmp/.gitkeep
+_handoffs/*
+!_handoffs/.gitkeep
+build/*
+!build/.gitkeep
+!build/_for_debug/
+!build/_for_debug/.gitkeep
+
+# Логи
+*.log
+
+# Временные файлы
+*.bak
+*.bak.md
+*.tmp
+
+# 1C infobase and distribution artifacts
+*.1CD
+*.1CD.cfl
+*.1CL
+*.1CL.cfl
+*.cgr
+*.cgr.cfl
+*.cf
+*.cfe
+*.dt
+*.epf
+*.erf
+*.hbk
+*.lgp
+*.lgf
+*.lck
+*.pfl
+*.v8i
+
+# Приватные ключи и сертификаты
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Env-файлы (кроме example)
+.env
+.env.*
+
+# Файлы с креденшелами
+credentials*
+secrets*
+*.secret
+*.cred
+
+# Vanessa Automation — артефакты прогонов (features/fixtures в git)
+tests/screenshots/*
+!tests/screenshots/.gitkeep
+tests/reports/*
+!tests/reports/.gitkeep
