@@ -2,7 +2,7 @@
 
 **Cursor-скилл стандартного рабочего каркаса 1С-проекта**
 
-Поднимает в любом каталоге типовой рабочий каркас 1С: `src/`, `tests/`, `_INFOBASE/`, `_LOGS/`, правила [comol/ai_rules_1c](https://github.com/comol/ai_rules_1c), опционально Vanessa, Конвертация данных и [Humanizer RU](https://github.com/comol/Humanizer_RU), затем OpenSpec.
+Поднимает в любом каталоге типовой рабочий каркас 1С: сначала все вопросы, потом каталоги `src/`, `_INFOBASE/`, `_LOGS/`, правила [comol/ai_rules_1c](https://github.com/comol/ai_rules_1c), опционально Vanessa, Конвертация данных и [Humanizer RU](https://github.com/comol/Humanizer_RU), затем OpenSpec. Каталоги `tests/` и `tools/vanessa` — только если Vanessa = да. `tools/mcp-toolkit` — только если КД ≠ 0. Git init и первый коммит — в конце, только после явного «да».
 
 [![Cursor Skill](https://img.shields.io/badge/Cursor-Skill-000000.svg)](#установка-в-cursor)
 [![Install](https://img.shields.io/badge/install-online%20%7C%20offline-informational.svg)](#онлайн-и-офлайн)
@@ -26,9 +26,11 @@ Skill даёт Cursor одну задачу: собрать **полный** к�
       ↓
 Cursor + 1c-project-scaffold
       ↓
-вопросы: офлайн/онлайн → Vanessa? → КД? → Humanizer RU? → какая ИБ?
+все вопросы сразу: офлайн/онлайн → Vanessa? → КД? → Humanizer RU? → ИБ → git init+коммит после установки?
       ↓
-каталоги, 1c-rules, опциональные бинарники и скиллы, OpenSpec
+каталоги (Vanessa/КД — только при «да»), 1c-rules, опциональные бинарники и скиллы, OpenSpec, ИБ
+      ↓
+git init и первый коммит — только если на вопросе git было «да»
 ```
 
 Сам Skill предназначен для Cursor. Результат — обычный 1С-проект на диске, с которым можно работать дальше любым клиентом.
@@ -38,15 +40,19 @@ Cursor + 1c-project-scaffold
 Агент по [SKILL.md](SKILL.md) проходит фиксированный цикл. Молчание **не** считается ответом ни на один вопрос.
 
 1. Выбрать корень проекта (не `~`, не `Downloads`, не каталог конфига CLI).
-2. Спросить **онлайн** или **офлайн** — до любых загрузок.
-3. Создать каталоги и ignore-файлы (`scaffold.sh`).
+2. **Фаза вопросов** — все ответы подряд, без `scaffold.sh` и загрузок. Молчание нигде не ответ:
+   - онлайн / офлайн;
+   - Vanessa (да / нет);
+   - КД (0 / 2 / 3 / обе);
+   - Humanizer RU (0 / локально / глобально);
+   - ИБ: не создавать / **пустая** (исходники не грузить) / **из исходников** (XML в `src/cf` или `.cf`/`.cfe`) / шаблон из `tmplts`; если «из исходников» — сразу второй вопрос про XML или пути `.cf`/`.cfe`;
+   - git: инициализировать репозиторий и сделать **первый коммит после** полной установки? (да / нет).
+3. Создать каталоги и ignore-файлы (`scaffold.sh` с `--vanessa` / `--kd` только при выборе). Без Vanessa нет `tests/` и `tools/vanessa`. Без КД нет `tools/mcp-toolkit`.
 4. Поставить [comol/ai_rules_1c](https://github.com/comol/ai_rules_1c): `AGENTS.md`, `.cursor/`, `.dev.env`.
-5. Спросить про **Vanessa Automation**. Да — EPF/CFE, скилл `vanessa-mcp`, `.cursor/mcp.json`. Нет — пустые `tests/` и `tools/vanessa`.
-6. Спросить про **Конвертация данных** (0 / КД 2 / КД 3 / обе). Не ноль — `MCP_Toolkit.epf` и скиллы toolkit / `kd2-rules` / `kd31-rules`.
-7. Спросить про **Humanizer RU** (0 / локально в проект / глобально на компьютер). Не ноль — скилл `humanizer-ru`.
-8. Инициализировать **OpenSpec** (`openspec init`). Каркас без этого шага не считается завершённым.
-9. Дописать пути в `.dev.env` и секцию «Структура каталогов» в `USER-RULES.md`.
-10. Спросить про тестовую ИБ: не создавать / пустая / шаблон из `tmplts`. Затем отчёт.
+5. Vanessa = да — EPF/CFE, скилл `vanessa-mcp`, `.cursor/mcp.json`. КД ≠ 0 — `MCP_Toolkit.epf` и скиллы toolkit / `kd2-rules` / `kd31-rules`. Humanizer ≠ 0 — скилл `humanizer-ru`.
+6. Инициализировать **OpenSpec** (`openspec init`). Каркас без этого шага не считается завершённым.
+7. Дописать пути в `.dev.env` и секцию «Структура каталогов» в `USER-RULES.md` (без папок, которых нет).
+8. Создать тестовую ИБ по уже известному выбору. Затем, если git = да — `git init` (если ещё нет `.git`) и первый коммит по `.gitignore`. Отчёт.
 
 Главное правило:
 
@@ -54,11 +60,11 @@ Cursor + 1c-project-scaffold
 молчание ≠ да и ≠ нет
 ```
 
-Бинарники Vanessa и MCP Toolkit появляются на диске только после явного выбора. `1Cv8.1CD` — только после явного пункта на шаге ИБ.
+Бинарники Vanessa и MCP Toolkit появляются на диске только после явного выбора. `1Cv8.1CD` — только после явного пункта на шаге ИБ. Пустая ИБ не загружает конфигурацию из исходников.
 
 ## Что получается на выходе
 
-Дерево **проекта** (не этого репозитория):
+Дерево **проекта** (не этого репозитория). Каталоги Vanessa и КД — только если их выбрали:
 
 ```text
 project/
@@ -66,13 +72,13 @@ project/
 ├── src/cfe/                # расширения
 ├── src/epf/
 ├── src/erf/
-├── tests/features/         # Vanessa .feature
+├── tests/features/         # только Vanessa = да
 ├── tests/fixtures/
 ├── tests/screenshots/      # gitignored
 ├── tests/reports/          # gitignored
-├── tools/vanessa/          # EPF/CFE только если Vanessa = да
-├── tools/neurofish-mcp/    # client_mcp.cfe только если Vanessa = да
-├── tools/mcp-toolkit/      # MCP_Toolkit.epf только если КД ≠ 0
+├── tools/vanessa/          # только Vanessa = да
+├── tools/neurofish-mcp/    # только Vanessa = да
+├── tools/mcp-toolkit/      # только КД ≠ 0
 ├── build/_for_debug/
 ├── _INFOBASE/              # 1Cv8.1CD только после выбора ИБ
 ├── _LOGS/
@@ -87,7 +93,7 @@ project/
 └── .cursorignore
 ```
 
-Пустые каталоги получают `.gitkeep`. `*.epf` и `*.cfe` в git проекта не попадают; рядом лежит git-tracked `VERSION.txt`. Существующая выгрузка в `src/cf` не перезаписывается.
+Пустые каталоги получают `.gitkeep`. `ibcmd config export` не пишет в непустой каталог — перед XML-дампом в `src/cf` скрипт `seed-from-binaries.sh` отодвигает `.gitkeep`. `*.epf` и `*.cfe` в git проекта не попадают; рядом лежит git-tracked `VERSION.txt`. Существующая выгрузка в `src/cf` не перезаписывается без явного `--replace-xml`. XML в `src/cf` появляется после ветки «ИБ из исходников» с файлами `.cf`/`.cfe` (ветка XML в ИБ дамп не делает).
 
 ## Установка в Cursor
 
@@ -122,6 +128,10 @@ ln -sfn "$(pwd)" ~/.cursor/skills/1c-project-scaffold
 ```
 
 ```text
+Каркас и ИБ из исходников: вот .cf и расширения .cfe.
+```
+
+```text
 Только каталоги и правила, без Vanessa и без Конвертации данных.
 ```
 
@@ -129,7 +139,7 @@ ln -sfn "$(pwd)" ~/.cursor/skills/1c-project-scaffold
 Офлайн-установка каркаса, зависимости из архива скилла.
 ```
 
-Агент сам задаст режим (онлайн/офлайн), Vanessa, КД, Humanizer RU и ИБ. Не скачивает зависимости, пока нет явного ответа.
+Агент сначала соберёт все ответы (онлайн/офлайн, Vanessa, КД, Humanizer RU, ИБ, git), потом ставит и качает. Не скачивает зависимости и не создаёт опциональные каталоги, пока нет явного ответа. Git — после OpenSpec и ИБ, только если было «да».
 
 ## Онлайн и офлайн
 
@@ -175,7 +185,10 @@ bash ~/.cursor/skills/1c-project-scaffold/scripts/pack-offline-bundle.sh
 │   ├── pack-offline-bundle.sh
 │   ├── offline-lib.sh
 │   ├── list-templates.sh
-│   └── create-empty-ib.sh
+│   ├── create-empty-ib.sh
+│   ├── linux-ib-env.sh
+│   ├── seed-from-binaries.sh
+│   └── seed-from-xml.sh
 ├── templates/
 │   ├── gitignore
 │   ├── cursorignore
@@ -212,8 +225,9 @@ bash ~/.cursor/skills/1c-project-scaffold/scripts/pack-offline-bundle.sh
 
 `1c-project-scaffold` не заменяет Vanessa, Конфигуратор, КД, Humanizer RU и OpenSpec. Он только собирает рабочее место.
 
-- не делает `git init` в проекте;
+- не делает `git init` и не коммитит без явного «да» на вопросе про git; не делает это до конца установки;
 - не создаёт `1Cv8.1CD` и не подставляет шаблон без явного выбора;
+- не загружает XML / `.cf` / `.cfe` в ИБ, если выбрана **пустая** база;
 - не загружает `client_mcp.cfe`, `VAExtension.cfe` и `MCP_Toolkit.epf` в конфигурацию (файлы на диске; toolkit открывается через Файл → Открыть в копии ИБ КД);
 - в офлайне не ходит в GitHub и не вызывает `npx`;
 - не перезаписывает уже лежащие `*.epf` / `*.cfe` и пользовательские `USER-RULES.md` / `memory.md` / `LLM-RULES.md`.
@@ -225,7 +239,7 @@ Cursor Skill
       ↓
 Рабочий каталог 1С
       ↓
-разработка / Vanessa / КД / Humanizer RU / OpenSpec
+разработка / Vanessa / КД / Humanizer RU / OpenSpec / git (если да)
 ```
 
 ## Лицензия
@@ -239,7 +253,7 @@ Cursor Skill
 | Путь | Назначение |
 |------|------------|
 | `SKILL.md` | протокол: шаги, hard stops, отчёт |
-| `scripts/` | установка каркаса, 1c-rules, Vanessa, toolkit, Humanizer RU, офлайн-архив, ИБ |
+| `scripts/` | установка каркаса, 1c-rules, Vanessa, toolkit, Humanizer RU, офлайн-архив, ИБ (`create-empty-ib.sh`, `seed-from-binaries.sh`, `seed-from-xml.sh`) |
 | `templates/` | `.gitignore`, `.cursorignore`, `mcp.json` |
 | `vendor/offline/` | архив зависимостей для офлайн-установки |
 | `vendor/vanessa-mcp/` | протокол Vanessa + `docs/integration.md` (в проект, не в `_docs/`) |

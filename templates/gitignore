@@ -65,9 +65,3 @@ credentials*
 secrets*
 *.secret
 *.cred
-
-# Vanessa Automation — артефакты прогонов (features/fixtures в git)
-tests/screenshots/*
-!tests/screenshots/.gitkeep
-tests/reports/*
-!tests/reports/.gitkeep

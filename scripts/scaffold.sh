@@ -1,29 +1,46 @@
 #!/usr/bin/env bash
 # Scaffold the standard 1C working-directory layout.
-# Usage: scaffold.sh [project-root]
+# Usage: scaffold.sh [project-root] [--vanessa] [--kd]
 # Does not create 1Cv8.1CD, does not overwrite src/cf contents.
 # 1c-rules are installed separately by install-1c-rules.sh (see SKILL.md).
+# --vanessa / --kd default off: do not create tests/, tools/vanessa,
+# tools/neurofish-mcp, or tools/mcp-toolkit unless the matching flag is set.
 set -euo pipefail
 
-ROOT="${1:-.}"
+WITH_VANESSA=0
+WITH_KD=0
+ROOT=""
+for arg in "$@"; do
+  case "$arg" in
+    --vanessa) WITH_VANESSA=1 ;;
+    --kd) WITH_KD=1 ;;
+    --*)
+      echo "usage: scaffold.sh [project-root] [--vanessa] [--kd]" >&2
+      echo "unknown flag: $arg" >&2
+      exit 1
+      ;;
+    *)
+      if [[ -n "$ROOT" ]]; then
+        echo "usage: scaffold.sh [project-root] [--vanessa] [--kd]" >&2
+        exit 1
+      fi
+      ROOT="$arg"
+      ;;
+  esac
+done
+ROOT="${ROOT:-.}"
 ROOT="$(cd "$ROOT" && pwd)"
 SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 TPL="$SKILL_DIR/templates"
 
 echo "Project root: $ROOT"
+echo "vanessa=${WITH_VANESSA} kd=${WITH_KD}"
 
 dirs=(
   "src/cf"
   "src/cfe"
   "src/epf"
   "src/erf"
-  "tests/features"
-  "tests/fixtures"
-  "tests/screenshots"
-  "tests/reports"
-  "tools/vanessa"
-  "tools/neurofish-mcp"
-  "tools/mcp-toolkit"
   "_INFOBASE"
   "_LOGS"
   "_archives"
@@ -32,6 +49,19 @@ dirs=(
   "_handoffs"
   "_docs"
 )
+if [[ "$WITH_VANESSA" -eq 1 ]]; then
+  dirs+=(
+    "tests/features"
+    "tests/fixtures"
+    "tests/screenshots"
+    "tests/reports"
+    "tools/vanessa"
+    "tools/neurofish-mcp"
+  )
+fi
+if [[ "$WITH_KD" -eq 1 ]]; then
+  dirs+=("tools/mcp-toolkit")
+fi
 
 for d in "${dirs[@]}"; do
   mkdir -p "$ROOT/$d"
@@ -54,7 +84,7 @@ copy_if_missing() {
   fi
 }
 
-# Merge Vanessa artifact ignores into an existing .gitignore (template copy is skip-if-exists).
+# Merge Vanessa artifact ignores into .gitignore (template copy is skip-if-exists).
 ensure_vanessa_gitignore() {
   local gi="$ROOT/.gitignore"
   local marker="tests/screenshots/*"
@@ -76,9 +106,31 @@ ensure_vanessa_gitignore() {
   echo "appended Vanessa artifact rules to .gitignore"
 }
 
+ensure_vanessa_cursorignore() {
+  local ci="$ROOT/.cursorignore"
+  local marker="tests/screenshots/"
+  if [[ ! -f "$ci" ]]; then
+    return 0
+  fi
+  if grep -qF "$marker" "$ci" 2>/dev/null; then
+    echo "cursorignore already has Vanessa artifact rules"
+    return 0
+  fi
+  {
+    echo ""
+    echo "# Vanessa run artifacts"
+    echo "tests/screenshots/"
+    echo "tests/reports/"
+  } >> "$ci"
+  echo "appended Vanessa artifact rules to .cursorignore"
+}
+
 copy_if_missing "$TPL/gitignore" "$ROOT/.gitignore"
 copy_if_missing "$TPL/cursorignore" "$ROOT/.cursorignore"
-ensure_vanessa_gitignore
+if [[ "$WITH_VANESSA" -eq 1 ]]; then
+  ensure_vanessa_gitignore
+  ensure_vanessa_cursorignore
+fi
 
 detect_platform() {
   local p=""
